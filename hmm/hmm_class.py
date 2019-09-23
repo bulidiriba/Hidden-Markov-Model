@@ -146,8 +146,31 @@ class Hmm:
 
         return e
 
-    def do_mstep(self):
-        pass
+    def m_step(self):
+        new_trans_prob = np.zeros((2 ** self.state))
+        e = self.e_step()
+
+        num = sum(e[0])
+        den = sum(e[0]) + sum(e[1])
+        value = num / den
+        new_trans_prob[0] = value
+
+        num = sum(e[1])
+        den = sum(e[0]) + sum(e[1])
+        value = num / den
+        new_trans_prob[1] = value
+
+        num = sum(e[2])
+        den = sum(e[2]) + sum(e[3])
+        value = num / den
+        new_trans_prob[2] = value
+
+        num = sum(e[3])
+        den = sum(e[2]) + sum(e[3])
+        value = num / den
+        new_trans_prob[3] = value
+
+        return new_trans_prob
 
 def main():
 
@@ -206,6 +229,10 @@ def main():
     e = hmm.e_step()
 
     print(e)
+
+    m = hmm.m_step()
+
+    print(m.reshape(2, 2))
 
 
 
