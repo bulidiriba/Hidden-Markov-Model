@@ -123,8 +123,28 @@ class Hmm:
 
         return backward
 
-    def do_estep(self):
-        pass
+    def e_step(self):
+        e = np.zeros((2 ** self.state, self.time - 1))
+
+        forward = self.forward_algorithim()
+        backward = self.backward_algorithim()
+
+        for t in range(self.time - 1):
+            prob = []
+            for i in range(self.state):
+                for j in range(self.state):
+                    # print(state_dict.get(i), state_dict.get(j))
+                    obs_indx = next((indx for indx, obs in self.obs_dict.items() if obs == self.given_obs[t + 1]), None)
+
+                    numerator = forward[t][i] * self.trans_prob[i][j] * self.emit_prob[j][obs_indx] * backward[t + 1][j]
+                    # denominator = sum(forward[time-1])
+                    denominator = sum(forward[self.time - 1]) * sum(backward[0])
+                    value = numerator / denominator
+                    prob.append(value)
+
+            e[:, t] = prob
+
+        return e
 
     def do_mstep(self):
         pass
@@ -182,6 +202,10 @@ def main():
     backward = hmm.backward_algorithim()
 
     print(backward)
+
+    e = hmm.e_step()
+
+    print(e)
 
 
 
