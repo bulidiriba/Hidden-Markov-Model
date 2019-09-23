@@ -87,7 +87,41 @@ class Hmm:
         return viterbi, backpointer
 
     def backward_algorithim(self):
-        pass
+        backward = np.zeros((self.time, self.state))
+        # loop through all the time sequence of the given observations
+        t = self.time - 1
+        while t >= 0:
+            # loop through the current hidden state
+            for i in range(self.state):
+                path_probs = []  # list that stores path probabilities
+                # if the time is the first time use the initial probability
+                # and we have no previous forward probability
+                if t == self.time - 1:
+                    # the probability of each path
+                    prob = 1
+                    path_probs.append(prob)
+
+                # if the time is not the first time we use the transition probability,
+                # also we use the previous forward probability
+                else:
+                    # loop through the previous state,
+                    for j in range(self.state):
+                        # the path probability is multiplication of the transition prob times the emission probability
+                        obs_indx = next((indx for indx, obs in self.obs_dict.items() if obs == self.given_obs[t + 1]),
+                                        None)
+                        # prob = trans_prob[i][s] * emit_prob[s][obs_indx]
+                        prob = self.trans_prob[i][j] * self.emit_prob[j][obs_indx]
+                        # the forward probability from previous state is the multiplication of path probability times
+                        # the forward probability of that previous state
+                        bwrd_prob = backward[t + 1][j] * prob
+                        # then append the calculated forward probability through each path to the path_probs
+                        path_probs.append(bwrd_prob)
+
+                # the forward probability of current state, with in a current time, is the sum of the total path probabilities
+                backward[t][i] = sum(path_probs)
+            t -= 1
+
+        return backward
 
     def do_estep(self):
         pass
@@ -141,9 +175,13 @@ def main():
 
     print(foward)
 
-    viterbi = hmm.viterbi_algorithim()
+    viterbi, backpointer = hmm.viterbi_algorithim()
 
     print(viterbi)
+
+    backward = hmm.backward_algorithim()
+
+    print(backward)
 
 
 
