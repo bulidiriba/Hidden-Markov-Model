@@ -51,7 +51,40 @@ class Hmm:
         return forward
 
     def viterbi_algorithim(self):
-       pass
+        viterbi = np.zeros((self.time, self.state))
+        backpointer = np.zeros((self.time))
+        # loop through all the time sequence of the given observations
+        for t in range(self.time):
+            # loop through the current hidden state
+            for s in range(self.state):
+                su = []  # initialize the sum as zero
+                # if the time is the first time use the initial probability
+                # and we have no previous forward probability
+                if t == 0:
+                    # the probability
+                    obs_indx = next((indx for indx, obs in self.obs_dict.items() if obs == self.given_obs[t]), None)
+                    prob = self.init_prob[s] * self.emit_prob[s][obs_indx]
+                    su.append(prob)
+
+                # if the time is not the first time we use the transition probability,
+                # also we use the previous forward probability
+                else:
+                    # loop through the previous state,
+                    for i in range(self.state):
+                        # the current forward probability is the multiplication of the previous forward probability
+                        # with the path probability(the transition prob times the emission probability)
+                        obs_indx = next((indx for indx, obs in self.obs_dict.items() if obs == self.given_obs[t]), None)
+                        prob = viterbi[t - 1][i] * self.trans_prob[i][s] * self.emit_prob[s][obs_indx]
+                        su.append(prob)
+
+                # append the calculated forward probability to forward array
+                viterbi[t][s] = max(su)
+
+            viterbi_tolist = viterbi.tolist()
+            indx = viterbi_tolist[t].index(max(viterbi_tolist[t]))
+            backpointer[t] = indx
+
+        return viterbi, backpointer
 
     def backward_algorithim(self):
         pass
@@ -107,6 +140,12 @@ def main():
     foward = hmm.forward_algorithim()
 
     print(foward)
+
+    viterbi = hmm.viterbi_algorithim()
+
+    print(viterbi)
+
+
 
 
 
